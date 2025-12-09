@@ -1,0 +1,5 @@
+{
+  "name": "Cardinal Course Generator",
+  "description": "Generate world-class, Stanford-style course websites with readings, assignments, and capstone projects from any syllabus topic using Gemini AI.",
+  "requestFramePermissions": []
+}
