@@ -51,10 +51,27 @@ const courseSchema: Schema = {
         type: Type.OBJECT,
         properties: {
           title: { type: Type.STRING },
-          description: { type: Type.STRING, description: "Detailed instructions for the assignment." },
-          estimatedHours: { type: Type.INTEGER }
+          description: { type: Type.STRING, description: "Detailed, step-by-step technical instructions for the assignment." },
+          estimatedHours: { type: Type.INTEGER },
+          technicalRequirements: { 
+            type: Type.ARRAY, 
+            items: { type: Type.STRING }, 
+            description: "Specific technical constraints (e.g. 'Use Python 3.8+', 'Max runtime 2s', 'Implement O(n log n) sort')"
+          },
+          relevantLinks: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    title: { type: Type.STRING, description: "Title of the resource, e.g. 'LeetCode: Two Sum'" },
+                    url: { type: Type.STRING, description: "URL to the problem or resource" }
+                },
+                required: ["title", "url"]
+            },
+            description: "Links to relevant external practice problems (LeetCode, Kaggle, Project Euler) or documentation."
+          }
         },
-        required: ["title", "description", "estimatedHours"]
+        required: ["title", "description", "estimatedHours", "technicalRequirements", "relevantLinks"]
       }
     },
     projects: {
@@ -108,7 +125,7 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     Requirements:
     1. Structure the course into 8-12 weeks (modules).
     2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. Use real academic papers, textbook chapters, or authoritative videos.
-    3. Create challenging assignments.
+    3. Create challenging assignments. **IMPORTANT**: assignments must be deeply technical. Include specific constraints (memory, time complexity, specific libraries) and provide external links to similar practice problems (e.g. LeetCode, HackerRank, Kaggle, arXiv) where students can practice.
     4. Design 2-3 mid-sized projects.
     5. Design one massive, impressive Capstone Project that integrates all learning.
     

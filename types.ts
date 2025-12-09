@@ -9,6 +9,8 @@ export interface Assignment {
   title: string;
   description: string;
   estimatedHours: number;
+  technicalRequirements: string[];
+  relevantLinks: { title: string; url: string }[];
 }
 
 export interface Module {
@@ -42,7 +44,6 @@ export interface CourseData {
   prerequisites: string[];
   learningOutcomes: string[];
   modules: Module[];
-  // Readings are now inside modules for weekly granularity
   assignments: Assignment[];
   projects: Project[];
   capstone: Capstone;
