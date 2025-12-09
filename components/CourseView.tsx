@@ -20,7 +20,8 @@ export const CourseView: React.FC<CourseViewProps> = ({ course, onReset }) => {
     switch (activeTab) {
       case 'Home': return <HomeTab course={course} />;
       case 'Syllabus': return <SyllabusTab modules={course.modules} />;
-      case 'Readings': return <ReadingsTab readings={course.readings} />;
+      // Pass modules to ReadingsTab because readings are now nested in modules
+      case 'Readings': return <ReadingsTab modules={course.modules} />;
       case 'Assignments': return <AssignmentsTab assignments={course.assignments} />;
       case 'Projects': return <ProjectsTab projects={course.projects} />;
       case 'Capstone': return <CapstoneTab capstone={course.capstone} />;

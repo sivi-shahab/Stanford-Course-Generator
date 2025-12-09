@@ -27,22 +27,22 @@ const courseSchema: Schema = {
           weekNumber: { type: Type.INTEGER },
           topic: { type: Type.STRING },
           description: { type: Type.STRING },
-          keyConcepts: { type: Type.ARRAY, items: { type: Type.STRING } }
+          keyConcepts: { type: Type.ARRAY, items: { type: Type.STRING } },
+          readings: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                author: { type: Type.STRING },
+                type: { type: Type.STRING, enum: ["Book", "Paper", "Article", "Video"] },
+                description: { type: Type.STRING, description: "Brief summary of the reading and why it is relevant to this week." }
+              },
+              required: ["title", "author", "type", "description"]
+            }
+          }
         },
-        required: ["weekNumber", "topic", "description", "keyConcepts"]
-      }
-    },
-    readings: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          author: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["Book", "Paper", "Article", "Video"] },
-          description: { type: Type.STRING }
-        },
-        required: ["title", "author", "type", "description"]
+        required: ["weekNumber", "topic", "description", "keyConcepts", "readings"]
       }
     },
     assignments: {
@@ -51,7 +51,7 @@ const courseSchema: Schema = {
         type: Type.OBJECT,
         properties: {
           title: { type: Type.STRING },
-          description: { type: Type.STRING },
+          description: { type: Type.STRING, description: "Detailed instructions for the assignment." },
           estimatedHours: { type: Type.INTEGER }
         },
         required: ["title", "description", "estimatedHours"]
@@ -90,7 +90,6 @@ const courseSchema: Schema = {
     "prerequisites",
     "learningOutcomes",
     "modules",
-    "readings",
     "assignments",
     "projects",
     "capstone"
@@ -98,7 +97,7 @@ const courseSchema: Schema = {
 };
 
 export const generateCourse = async (topic: string, file?: { data: string; mimeType: string }): Promise<CourseData> => {
-  const model = "gemini-2.5-flash"; // Flash is sufficient for structured generation and fast
+  const model = "gemini-2.5-flash"; 
 
   const systemInstruction = `
     You are a distinguished professor and curriculum designer at Stanford University.
@@ -108,7 +107,7 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     
     Requirements:
     1. Structure the course into 8-12 weeks (modules).
-    2. Provide high-quality reading list (real academic papers or classic textbooks).
+    2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. Use real academic papers, textbook chapters, or authoritative videos.
     3. Create challenging assignments.
     4. Design 2-3 mid-sized projects.
     5. Design one massive, impressive Capstone Project that integrates all learning.
@@ -142,7 +141,7 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
         systemInstruction: systemInstruction,
         responseMimeType: "application/json",
         responseSchema: courseSchema,
-        temperature: 0.3, // Keep it focused and structured
+        temperature: 0.3,
       },
     });
 

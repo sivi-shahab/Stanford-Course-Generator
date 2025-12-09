@@ -16,6 +16,7 @@ export interface Module {
   topic: string;
   description: string;
   keyConcepts: string[];
+  readings: Reading[];
 }
 
 export interface Project {
@@ -41,7 +42,7 @@ export interface CourseData {
   prerequisites: string[];
   learningOutcomes: string[];
   modules: Module[];
-  readings: Reading[];
+  // Readings are now inside modules for weekly granularity
   assignments: Assignment[];
   projects: Project[];
   capstone: Capstone;
