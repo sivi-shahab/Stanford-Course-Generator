@@ -30,9 +30,16 @@ export interface Project {
 
 export interface Capstone {
   title: string;
-  problemStatement: string;
-  phases: string[];
-  finalDeliverable: string;
+  description: string;
+  requirements: {
+    complexity: string;
+    dataScale: string;
+    deployment: string;
+    industryStandards: string;
+  };
+  suggestedTopics: string[];
+  milestones: string[];
+  deliverables: string[];
 }
 
 export interface CourseData {

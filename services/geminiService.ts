@@ -90,12 +90,23 @@ const courseSchema: Schema = {
     capstone: {
       type: Type.OBJECT,
       properties: {
-        title: { type: Type.STRING },
-        problemStatement: { type: Type.STRING },
-        phases: { type: Type.ARRAY, items: { type: Type.STRING } },
-        finalDeliverable: { type: Type.STRING }
+        title: { type: Type.STRING, description: "Title like 'Industry-Scale Capstone Project'" },
+        description: { type: Type.STRING, description: "Explanation that the project is open-ended but strictly constrained by technical requirements." },
+        requirements: {
+          type: Type.OBJECT,
+          properties: {
+            complexity: { type: Type.STRING, description: "Required technical complexity (e.g., Microservices, Custom Architecture)" },
+            dataScale: { type: Type.STRING, description: "Data requirements (e.g., >10GB dataset, Real-time streaming)" },
+            deployment: { type: Type.STRING, description: "Deployment requirements (e.g., Kubernetes, CI/CD, <100ms latency)" },
+            industryStandards: { type: Type.STRING, description: "Compliance/Standards (e.g., GDPR, Unit Testing >80%, Documentation)" }
+          },
+          required: ["complexity", "dataScale", "deployment", "industryStandards"]
+        },
+        suggestedTopics: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-4 broad domains or problem areas students can choose from." },
+        milestones: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Phases of development." },
+        deliverables: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Final submission items (Code, Report, Demo)." }
       },
-      required: ["title", "problemStatement", "phases", "finalDeliverable"]
+      required: ["title", "description", "requirements", "suggestedTopics", "milestones", "deliverables"]
     }
   },
   required: [
@@ -127,7 +138,13 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. Use real academic papers, textbook chapters, or authoritative videos.
     3. Create challenging assignments. **IMPORTANT**: assignments must be deeply technical. Include specific constraints (memory, time complexity, specific libraries) and provide external links to similar practice problems (e.g. LeetCode, HackerRank, Kaggle, arXiv) where students can practice.
     4. Design 2-3 mid-sized projects.
-    5. Design one massive, impressive Capstone Project that integrates all learning.
+    5. Design one massive Capstone Project. **CRITICAL**: The Capstone must be OPEN-ENDED (students choose their own specific topic) but strictly constrained by INDUSTRY STANDARDS. 
+       - Do not simply assign "Build X". Instead, say "Build a system that solves a problem in domain Y, satisfying Z constraints."
+       - You must define strict requirements for:
+         * Technical Complexity (e.g., distributed systems, custom transformer models)
+         * Data Scale (e.g., large datasets, high velocity streams)
+         * Deployment (e.g., fully containerized, CI/CD pipeline, production monitoring)
+         * Industry Standards (e.g., thorough documentation, testing coverage, security compliance).
     
     Tone: Academic, Professional, Inspiring.
   `;
