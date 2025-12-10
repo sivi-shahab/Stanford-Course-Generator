@@ -1,7 +1,40 @@
-import React from 'react';
-import { Capstone } from '../../types';
+
+import React, { useState } from 'react';
+import { Capstone, GradingResult } from '../../types';
+import { gradeSubmission } from '../../services/geminiService';
 
 export const CapstoneTab: React.FC<{ capstone: Capstone }> = ({ capstone }) => {
+  const [submission, setSubmission] = useState('');
+  const [grade, setGrade] = useState<GradingResult | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!submission.trim()) return;
+
+    setLoading(true);
+    try {
+        const requirementsText = `
+            Complexity: ${capstone.requirements.complexity}
+            Data Scale: ${capstone.requirements.dataScale}
+            Deployment: ${capstone.requirements.deployment}
+            Standards: ${capstone.requirements.industryStandards}
+        `;
+        
+        const result = await gradeSubmission(
+            'Capstone',
+            capstone.title,
+            capstone.description + " Requirements: " + requirementsText,
+            submission
+        );
+        setGrade(result);
+    } catch (e) {
+        console.error(e);
+        alert("Grading failed. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-stanford-dark text-white p-8 md:p-12 rounded-sm shadow-2xl relative overflow-hidden mb-12">
@@ -71,6 +104,63 @@ export const CapstoneTab: React.FC<{ capstone: Capstone }> = ({ capstone }) => {
                     ))}
                  </div>
             </div>
+        </div>
+      </div>
+
+      {/* Capstone Submission Section */}
+      <div className="bg-white border border-gray-200 rounded-sm shadow-lg overflow-hidden mb-12">
+        <div className="bg-stanford-red p-4 text-white">
+            <h3 className="text-xl font-serif font-bold flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Final Capstone Submission
+            </h3>
+        </div>
+        <div className="p-8">
+            {!grade ? (
+                <>
+                    <p className="text-gray-600 mb-4">Please submit a comprehensive summary of your Capstone Project, including links to your codebase, architecture diagrams, and deployment URLs. The system will evaluate your submission against the Industry Requirements.</p>
+                    <textarea 
+                        className="w-full p-4 border border-gray-300 rounded-sm font-sans text-lg focus:ring-2 focus:ring-stanford-red focus:border-transparent outline-none h-48 bg-stanford-fog mb-4"
+                        placeholder="# Capstone Project Submission&#10;GitHub Repo: ...&#10;Architecture: ...&#10;Deployment URL: ...&#10;Description: ..."
+                        value={submission}
+                        onChange={(e) => setSubmission(e.target.value)}
+                    />
+                    <button 
+                        onClick={handleSubmit}
+                        disabled={loading || !submission}
+                        className="bg-stanford-dark text-white text-lg font-bold px-8 py-4 rounded-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full md:w-auto"
+                    >
+                        {loading ? 'Evaluating Capstone...' : 'Submit Final Capstone'}
+                    </button>
+                </>
+            ) : (
+                <div className="animate-fade-in">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-6 border-b border-gray-100">
+                        <div>
+                            <h4 className="text-2xl font-bold text-stanford-dark">Assessment Result</h4>
+                            <p className="text-gray-500">Based on industry standards compliance</p>
+                        </div>
+                        <div className="mt-4 md:mt-0 flex items-center gap-4">
+                            <div className={`text-4xl font-bold ${grade.score >= 80 ? 'text-green-600' : 'text-yellow-600'}`}>
+                                {grade.score}/100
+                            </div>
+                            <button 
+                                onClick={() => { setGrade(null); setSubmission(''); }}
+                                className="text-sm text-gray-400 underline hover:text-stanford-red"
+                            >
+                                Submit New Version
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-stanford-fog p-6 rounded-sm border-l-4 border-stanford-red">
+                        <h5 className="font-bold text-stanford-dark mb-2 uppercase tracking-wide text-sm">Instructor Feedback</h5>
+                        <div className="prose prose-lg text-gray-700">
+                            {grade.feedback}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
       </div>
 

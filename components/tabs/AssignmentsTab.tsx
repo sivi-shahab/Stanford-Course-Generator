@@ -1,9 +1,14 @@
-import React from 'react';
-import { Assignment } from '../../types';
+
+import React, { useState } from 'react';
+import { Assignment, GradingResult } from '../../types';
 import { jsPDF } from 'jspdf';
+import { gradeSubmission } from '../../services/geminiService';
 
 export const AssignmentsTab: React.FC<{ assignments: Assignment[] }> = ({ assignments }) => {
-  
+  const [submissions, setSubmissions] = useState<{ [key: number]: string }>({});
+  const [grades, setGrades] = useState<{ [key: number]: GradingResult }>({});
+  const [loadingMap, setLoadingMap] = useState<{ [key: number]: boolean }>({});
+
   const handleDownload = (assignment: Assignment) => {
     const doc = new jsPDF();
     
@@ -84,6 +89,27 @@ export const AssignmentsTab: React.FC<{ assignments: Assignment[] }> = ({ assign
     doc.save(`${assignment.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
   };
 
+  const handleSubmit = async (index: number, assignment: Assignment) => {
+    const submissionText = submissions[index];
+    if (!submissionText?.trim()) return;
+
+    setLoadingMap(prev => ({ ...prev, [index]: true }));
+    try {
+        const result = await gradeSubmission(
+            'Assignment',
+            assignment.title,
+            assignment.description + " " + assignment.technicalRequirements.join(" "),
+            submissionText
+        );
+        setGrades(prev => ({ ...prev, [index]: result }));
+    } catch (e) {
+        console.error(e);
+        alert("Grading failed. Please try again.");
+    } finally {
+        setLoadingMap(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-3xl font-serif font-bold text-stanford-dark mb-8">Problem Sets & Assignments</h2>
@@ -138,16 +164,52 @@ export const AssignmentsTab: React.FC<{ assignments: Assignment[] }> = ({ assign
                  </div>
              </div>
                 
-             <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                <button 
-                    onClick={() => handleDownload(assignment)}
-                    className="text-white bg-stanford-red hover:bg-[#721111] font-bold text-sm uppercase tracking-wider px-5 py-3 rounded-sm transition-all flex items-center gap-2 shadow-sm"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4v12" />
-                    </svg>
-                    Download PDF Instructions
-                </button>
+             <div className="p-4 bg-gray-50 border-t border-gray-200 flex flex-col gap-4">
+                <div className="flex justify-end">
+                    <button 
+                        onClick={() => handleDownload(assignment)}
+                        className="text-white bg-stanford-red hover:bg-[#721111] font-bold text-sm uppercase tracking-wider px-5 py-3 rounded-sm transition-all flex items-center gap-2 shadow-sm"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4v12" />
+                        </svg>
+                        Download PDF Instructions
+                    </button>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 mt-2">
+                    <h4 className="font-bold text-stanford-dark mb-2 text-sm uppercase tracking-wider">Student Submission</h4>
+                    {!grades[idx] ? (
+                        <div className="flex flex-col gap-3">
+                            <textarea 
+                                className="w-full p-3 border border-gray-300 rounded-sm font-sans text-sm focus:ring-2 focus:ring-stanford-red focus:border-transparent outline-none h-32"
+                                placeholder="Paste your solution code, link to repository, or answer here..."
+                                value={submissions[idx] || ''}
+                                onChange={(e) => setSubmissions(prev => ({ ...prev, [idx]: e.target.value }))}
+                            />
+                            <button 
+                                onClick={() => handleSubmit(idx, assignment)}
+                                disabled={loadingMap[idx] || !submissions[idx]}
+                                className="self-end bg-stanford-dark text-white px-6 py-2 rounded-sm text-sm font-semibold hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                {loadingMap[idx] ? 'Grading...' : 'Submit for Grading'}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="bg-white border-l-4 border-stanford-red p-4 shadow-sm animate-fade-in">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-bold text-lg text-stanford-dark">Grade: <span className={grades[idx].score >= 70 ? 'text-green-600' : 'text-red-600'}>{grades[idx].score}/100</span></span>
+                                <button 
+                                    onClick={() => setGrades(prev => { const n = {...prev}; delete n[idx]; return n; })}
+                                    className="text-xs text-gray-400 underline hover:text-gray-600"
+                                >
+                                    Resubmit
+                                </button>
+                            </div>
+                            <p className="text-gray-700 text-sm leading-relaxed">{grades[idx].feedback}</p>
+                        </div>
+                    )}
+                </div>
              </div>
           </div>
         ))}

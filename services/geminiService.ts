@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { CourseData } from "../types";
+import { CourseData, GradingResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -125,6 +126,15 @@ const courseSchema: Schema = {
   ]
 };
 
+const gradingSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    score: { type: Type.INTEGER, description: "Score out of 100" },
+    feedback: { type: Type.STRING, description: "Constructive feedback and analysis of the submission" }
+  },
+  required: ["score", "feedback"]
+};
+
 export const generateCourse = async (topic: string, file?: { data: string; mimeType: string }): Promise<CourseData> => {
   const model = "gemini-2.5-flash"; 
 
@@ -194,3 +204,49 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     throw error;
   }
 };
+
+export const gradeSubmission = async (
+  contextType: 'Assignment' | 'Project' | 'Capstone',
+  title: string,
+  requirements: string,
+  submission: string
+): Promise<GradingResult> => {
+  const model = "gemini-2.5-flash";
+
+  const systemInstruction = `
+    You are a strict but fair Teaching Assistant at Stanford University.
+    Your job is to grade student submissions for ${contextType}s.
+    
+    Context Title: ${title}
+    Requirements/Description: ${requirements}
+    
+    Evaluate the Student Submission based on:
+    1. Relevance to the requirements.
+    2. Technical correctness (if code is provided) or depth of thought (if text).
+    3. Completeness.
+
+    Provide a score from 0 to 100.
+    Provide constructive feedback explaining the score and how to improve.
+    If the submission is too short or irrelevant, give a low score.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: `Student Submission: "${submission}"`,
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: gradingSchema,
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No grading response");
+    
+    return JSON.parse(text) as GradingResult;
+  } catch (error) {
+    console.error("Grading Error", error);
+    return { score: 0, feedback: "Error generating grade. Please try again." };
+  }
+}

@@ -1,3 +1,4 @@
+
 export interface Reading {
   title: string;
   author: string;
@@ -55,4 +56,9 @@ export interface CourseData {
   assignments: Assignment[];
   projects: Project[];
   capstone: Capstone;
+}
+
+export interface GradingResult {
+  score: number;
+  feedback: string;
 }
