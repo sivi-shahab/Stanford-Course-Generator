@@ -36,7 +36,8 @@ const courseSchema: Schema = {
                 title: { type: Type.STRING },
                 author: { type: Type.STRING },
                 type: { type: Type.STRING, enum: ["Book", "Paper", "Article", "Video"] },
-                description: { type: Type.STRING, description: "Brief summary of the reading and why it is relevant to this week." }
+                description: { type: Type.STRING, description: "Brief summary of the reading and why it is relevant to this week." },
+                url: { type: Type.STRING, description: "URL to the resource. MANDATORY for 'Video' type (YouTube link)." }
               },
               required: ["title", "author", "type", "description"]
             }
@@ -135,7 +136,10 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     
     Requirements:
     1. Structure the course into 8-12 weeks (modules).
-    2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. Use real academic papers, textbook chapters, or authoritative videos.
+    2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. 
+       - Use real academic papers, textbook chapters, or authoritative videos.
+       - **MANDATORY**: Include at least one 'Video' resource per week if available (e.g., Stanford Online, MIT OpenCourseWare, or tech conference talks on YouTube).
+       - **PROVIDE VALID URLs** for these resources, especially for YouTube videos.
     3. Create challenging assignments. **IMPORTANT**: assignments must be deeply technical. Include specific constraints (memory, time complexity, specific libraries) and provide external links to similar practice problems (e.g. LeetCode, HackerRank, Kaggle, arXiv) where students can practice.
     4. Design 2-3 mid-sized projects.
     5. Design one massive Capstone Project. **CRITICAL**: The Capstone must be OPEN-ENDED (students choose their own specific topic) but strictly constrained by INDUSTRY STANDARDS. 

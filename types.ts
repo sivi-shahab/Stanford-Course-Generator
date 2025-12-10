@@ -3,6 +3,7 @@ export interface Reading {
   author: string;
   type: 'Book' | 'Paper' | 'Article' | 'Video';
   description: string;
+  url?: string;
 }
 
 export interface Assignment {
