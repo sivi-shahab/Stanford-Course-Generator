@@ -145,13 +145,13 @@ export const generateCourse = async (topic: string, file?: { data: string; mimeT
     The course should be rigorous, academic, and practical.
     
     Requirements:
-    1. Structure the course into 8-12 weeks (modules).
+    1. Structure the course into 8-16 weeks (modules).
     2. FOR EACH WEEK, provide a specific reading list (2-3 items) relevant to that week's topic. 
        - Use real academic papers, textbook chapters, or authoritative videos.
        - **MANDATORY**: Include at least one 'Video' resource per week if available (e.g., Stanford Online, MIT OpenCourseWare, or tech conference talks on YouTube).
        - **PROVIDE VALID URLs** for these resources, especially for YouTube videos.
-    3. Create challenging assignments. **IMPORTANT**: assignments must be deeply technical. Include specific constraints (memory, time complexity, specific libraries) and provide external links to similar practice problems (e.g. LeetCode, HackerRank, Kaggle, arXiv) where students can practice.
-    4. Design 2-3 mid-sized projects.
+    3. Create challenging assignments. **IMPORTANT**: Create exactly ONE assignment per week (e.g. if 12 weeks, 12 assignments). Include specific constraints (memory, time complexity, specific libraries) and provide external links to similar practice problems (e.g. LeetCode, HackerRank, Kaggle, arXiv) where students can practice.
+    4. Design a mid-sized project every 3 weeks (e.g. Week 3, 6, 9, 12, 15).
     5. Design one massive Capstone Project. **CRITICAL**: The Capstone must be OPEN-ENDED (students choose their own specific topic) but strictly constrained by INDUSTRY STANDARDS. 
        - Do not simply assign "Build X". Instead, say "Build a system that solves a problem in domain Y, satisfying Z constraints."
        - You must define strict requirements for:
